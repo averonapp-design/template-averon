@@ -41,7 +41,7 @@ jobs:
           cat .env.build | jq -r 'to_entries[]|"\(.key)=\(.value)"' >> $GITHUB_ENV
 
       - name: Instalar dependências
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --no-wait
