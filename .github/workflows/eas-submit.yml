@@ -1,0 +1,30 @@
+name: EAS Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: "ID do Build"
+        required: true
+      platform:
+        description: "android ou ios"
+        required: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Enviar Build
+        run: eas submit --platform ${{ inputs.platform }} --id ${{ inputs.build_id }} --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
