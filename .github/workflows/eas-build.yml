@@ -1,0 +1,49 @@
+name: EAS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "android ou ios"
+        required: true
+      profile:
+        description: "Perfil do EAS"
+        required: true
+        default: production
+      env_json:
+        description: "Variáveis de ambiente em JSON"
+        required: true
+      expo_project_id:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Instalar EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Escrever variáveis
+        run: |
+          echo '${{ inputs.env_json }}' > .env.build
+          cat .env.build | jq -r 'to_entries[]|"\(.key)=\(.value)"' >> $GITHUB_ENV
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
