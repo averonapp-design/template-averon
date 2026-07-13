@@ -4,21 +4,25 @@ on:
   workflow_dispatch:
     inputs:
       platform:
-        description: "android ou ios"
+        description: "android, ios ou all"
         required: true
+        default: all
       profile:
         description: "Perfil do EAS"
         required: true
         default: production
       env_json:
-        description: "Variáveis de ambiente em JSON"
+        description: "Variáveis de ambiente em JSON (injetadas pelo Lovable)"
         required: true
       expo_project_id:
+        description: "Expo project id (opcional)"
         required: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ENV_JSON: ${{ inputs.env_json }}
 
     steps:
       - uses: actions/checkout@v4
@@ -28,17 +32,16 @@ jobs:
           node-version: 20
 
       - name: Instalar jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Instalar EAS CLI
         run: npm install -g eas-cli
 
-      - name: Escrever variáveis
+      - name: Exportar env vars do Lovable
         run: |
-          echo '${{ inputs.env_json }}' > .env.build
-          cat .env.build | jq -r 'to_entries[]|"\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo "$ENV_JSON" > .env.build
+          # exporta cada chave do JSON como env var do job (vira EXPO_PUBLIC_* automaticamente)
+          echo "$ENV_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
 
       - name: Instalar dependências
         run: npm install
