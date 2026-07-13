@@ -5,6 +5,8 @@ const bundleIos = process.env.IOS_BUNDLE_ID || "com.seletacomunidade.app";
 const pkgAndroid = process.env.ANDROID_PACKAGE || "com.seletacomunidade.app";
 const version = process.env.APP_VERSION || "1.0.0";
 const easProjectId = process.env.EXPO_PROJECT_ID || "3c1585f9-5d91-46b0-bc3e-55f967931a32";
+const googleServicesIos = process.env.GOOGLE_SERVICES_IOS_PATH || "./GoogleService-Info.plist";
+const googleServicesAndroid = process.env.GOOGLE_SERVICES_ANDROID_PATH || "./google-services.json";
 
 export default {
   expo: {
@@ -24,7 +26,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: bundleIos,
-      googleServicesFile: "./GoogleService-Info.plist",
+      googleServicesFile: googleServicesIos,
       icon: iconPath,
       infoPlist: {
         NSCameraUsageDescription: "Usado para escanear QR Codes promocionais",
@@ -36,7 +38,7 @@ export default {
     android: {
       package: pkgAndroid,
       versionCode: 4,
-      googleServicesFile: "./google-services.json",
+      googleServicesFile: googleServicesAndroid,
       adaptiveIcon: {
         foregroundImage: iconPath,
         backgroundColor: "#0F172A",
