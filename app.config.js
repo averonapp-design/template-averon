@@ -1,5 +1,6 @@
 // app.config.js
 const appName = process.env.APP_NAME || "Seleta Comunidade";
+const appSlug = process.env.APP_SLUG || "seletacomunidade";
 const iconPath = process.env.APP_ICON_PATH || "./assets/images/icon.png";
 const bundleIos = process.env.IOS_BUNDLE_ID || "com.seletacomunidade.app";
 const pkgAndroid = process.env.ANDROID_PACKAGE || "com.seletacomunidade.app";
@@ -11,11 +12,11 @@ const googleServicesAndroid = process.env.GOOGLE_SERVICES_ANDROID_PATH || "./goo
 export default {
   expo: {
     name: appName,
-    slug: "seletacomunidade",
+    slug: appSlug,
     version,
     orientation: "portrait",
     icon: iconPath,
-    scheme: "seletacomunidade",
+    scheme: appSlug,
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
