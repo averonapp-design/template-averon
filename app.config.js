@@ -5,7 +5,7 @@ const iconPath = process.env.APP_ICON_PATH || "./assets/images/icon.png";
 const bundleIos = process.env.IOS_BUNDLE_ID || "com.seletacomunidade.app";
 const pkgAndroid = process.env.ANDROID_PACKAGE || "com.seletacomunidade.app";
 const version = process.env.APP_VERSION || "1.0.0";
-const easProjectId = process.env.EXPO_PROJECT_ID; // sem fallback — vem do eas init
+const easProjectId = process.env.EXPO_PROJECT_ID; 55d940a5-19e7-4ef1-80cd-e017fa8e6762
 const googleServicesIos = process.env.GOOGLE_SERVICES_IOS_PATH || "./GoogleService-Info.plist";
 const googleServicesAndroid = process.env.GOOGLE_SERVICES_ANDROID_PATH || "./google-services.json";
 
