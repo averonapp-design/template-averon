@@ -45,8 +45,18 @@ jobs:
       - name: Exportar env vars do Lovable
         run: |
           echo "$ENV_JSON" > .env.build
-          # exporta cada chave do JSON como env var do job (vira EXPO_PUBLIC_* automaticamente)
           echo "$ENV_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+
+      - name: Configurar Apple ASC API Key (iOS auto-credentials)
+        if: ${{ inputs.platform == 'ios' || inputs.platform == 'all' }}
+        run: |
+          echo "::add-mask::${{ secrets.APPLE_ASC_KEY_P8 }}"
+          mkdir -p /tmp/asc
+          printf '%s' "${{ secrets.APPLE_ASC_KEY_P8 }}" > /tmp/asc/AuthKey.p8
+          chmod 600 /tmp/asc/AuthKey.p8
+          echo "EXPO_ASC_API_KEY_PATH=/tmp/asc/AuthKey.p8" >> "$GITHUB_ENV"
+          echo "EXPO_ASC_KEY_ID=${{ secrets.APPLE_ASC_KEY_ID }}" >> "$GITHUB_ENV"
+          echo "EXPO_ASC_ISSUER_ID=${{ secrets.APPLE_ASC_ISSUER_ID }}" >> "$GITHUB_ENV"
 
       - name: Instalar dependências
         run: bun install
