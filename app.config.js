@@ -5,7 +5,7 @@ const iconPath = process.env.APP_ICON_PATH || "./assets/images/icon.png";
 const bundleIos = process.env.IOS_BUNDLE_ID || "com.seletacomunidade.app";
 const pkgAndroid = process.env.ANDROID_PACKAGE || "com.seletacomunidade.app";
 const version = process.env.APP_VERSION || "1.0.0";
-const easProjectId = process.env.EXPO_PROJECT_ID || "3c1585f9-5d91-46b0-bc3e-55f967931a32";
+const easProjectId = process.env.EXPO_PROJECT_ID; // sem fallback — vem do eas init
 const googleServicesIos = process.env.GOOGLE_SERVICES_IOS_PATH || "./GoogleService-Info.plist";
 const googleServicesAndroid = process.env.GOOGLE_SERVICES_ANDROID_PATH || "./google-services.json";
 
@@ -121,9 +121,7 @@ export default {
       router: {
         origin: "https://replit.com/",
       },
-      eas: {
-        projectId: easProjectId,
-      },
+      ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
       apiKey: process.env.EXPO_PUBLIC_API_KEY,
       tenantId: process.env.EXPO_PUBLIC_TENANT_ID,
       apiUrl: process.env.EXPO_PUBLIC_API_URL,
