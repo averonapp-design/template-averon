@@ -8,6 +8,10 @@ on:
       platform:
         description: ios | android
         required: true
+      expo_project_id:
+        required: false
+      app_slug:
+        required: false
       apple_p8_key:
         required: false
       apple_key_id:
@@ -36,6 +40,9 @@ jobs:
           bun-version: latest
       - name: Instalar dependências
         run: bun install
+      - name: Exportar env vars do Lovable
+        run: |
+          echo '{"EXPO_PROJECT_ID":"${{ inputs.expo_project_id }}","APP_SLUG":"${{ inputs.app_slug }}"}' > env.json
       - name: Mask inputs
         run: |
           echo "::add-mask::${{ inputs.apple_p8_key }}"
