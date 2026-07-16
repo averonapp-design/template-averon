@@ -71,7 +71,7 @@ export default {
         "expo-build-properties",
         {
           ios: {
-            deploymentTarget: "15.1",
+            deploymentTarget: "16.4",
             buildReactNativeFromSource: true,
           },
         },
