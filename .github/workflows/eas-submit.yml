@@ -91,4 +91,4 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          eas submit --non-interactive --platform ${{ inputs.platform }} --id ${{ inputs.build_id }} --profile production
+          eas submit --non-interactive --platform ${{ inputs.platform }} --latest --profile production
