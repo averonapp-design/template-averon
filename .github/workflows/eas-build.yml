@@ -50,9 +50,14 @@ jobs:
       - name: Configurar Apple ASC API Key (iOS auto-credentials)
         if: ${{ inputs.platform == 'ios' || inputs.platform == 'all' }}
         run: |
-          echo "::add-mask::${{ secrets.APPLE_ASC_KEY_P8 }}"
+          # Suporta tanto APPLE_ASC_KEY_P8 quanto o typo APPLE_ASC_KEY_PR
+          ASC_KEY_CONTENT="${{ secrets.APPLE_ASC_KEY_P8 }}"
+          if [ -z "$ASC_KEY_CONTENT" ]; then
+            ASC_KEY_CONTENT="${{ secrets.APPLE_ASC_KEY_PR }}"
+          fi
+          echo "::add-mask::$ASC_KEY_CONTENT"
           mkdir -p /tmp/asc
-          printf '%s' "${{ secrets.APPLE_ASC_KEY_P8 }}" > /tmp/asc/AuthKey.p8
+          printf '%s' "$ASC_KEY_CONTENT" > /tmp/asc/AuthKey.p8
           chmod 600 /tmp/asc/AuthKey.p8
           echo "EXPO_ASC_API_KEY_PATH=/tmp/asc/AuthKey.p8" >> "$GITHUB_ENV"
           echo "EXPO_ASC_KEY_ID=${{ secrets.APPLE_ASC_KEY_ID }}" >> "$GITHUB_ENV"
