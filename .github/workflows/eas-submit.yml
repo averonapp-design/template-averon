@@ -1,30 +1,79 @@
 name: EAS Submit
-
 on:
   workflow_dispatch:
     inputs:
       build_id:
-        description: "ID do Build"
+        description: EAS build id
         required: true
       platform:
-        description: "android ou ios"
+        description: ios | android
         required: true
-
+      apple_p8_key:
+        required: false
+      apple_key_id:
+        required: false
+      apple_issuer_id:
+        required: false
+      apple_app_id:
+        required: false
+      play_service_account_json:
+        required: false
+      play_package_name:
+        required: false
 jobs:
   submit:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Instalar EAS CLI
-        run: npm install -g eas-cli
-
-      - name: Enviar Build
-        run: eas submit --platform ${{ inputs.platform }} --id ${{ inputs.build_id }} --non-interactive
+      - name: Install EAS CLI
+        run: npm i -g eas-cli
+      - name: Mask inputs
+        run: |
+          echo "::add-mask::${{ inputs.apple_p8_key }}"
+          echo "::add-mask::${{ inputs.play_service_account_json }}"
+      - name: Write Apple .p8
+        if: inputs.platform == 'ios' && inputs.apple_p8_key != ''
+        run: |
+          mkdir -p .credentials
+          printf '%s' "${{ inputs.apple_p8_key }}" > .credentials/apple.p8
+      - name: Write Play service account
+        if: inputs.platform == 'android' && inputs.play_service_account_json != ''
+        run: |
+          mkdir -p .credentials
+          printf '%s' '${{ inputs.play_service_account_json }}' > .credentials/play.json
+      - name: Build eas.json submit profile
+        run: |
+          node -e "
+            const fs = require('fs');
+            const platform = process.env.PLATFORM;
+            const j = fs.existsSync('eas.json') ? JSON.parse(fs.readFileSync('eas.json','utf8')) : { cli:{ version:'>= 16.0.0', appVersionSource:'local' }, build:{ production:{} } };
+            j.submit = j.submit || {};
+            j.submit.production = j.submit.production || {};
+            if (platform === 'ios') {
+              j.submit.production.ios = {
+                ascApiKeyPath: '.credentials/apple.p8',
+                ascApiKeyId: process.env.APPLE_KEY_ID,
+                ascApiKeyIssuerId: process.env.APPLE_ISSUER_ID,
+                ascAppId: process.env.APPLE_APP_ID,
+              };
+            } else {
+              j.submit.production.android = {
+                serviceAccountKeyPath: '.credentials/play.json',
+                track: 'internal',
+              };
+            }
+            fs.writeFileSync('eas.json', JSON.stringify(j, null, 2));
+          "
+        env:
+          PLATFORM: ${{ inputs.platform }}
+          APPLE_KEY_ID: ${{ inputs.apple_key_id }}
+          APPLE_ISSUER_ID: ${{ inputs.apple_issuer_id }}
+          APPLE_APP_ID: ${{ inputs.apple_app_id }}
+      - name: eas submit
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas submit --non-interactive --platform ${{ inputs.platform }} --id ${{ inputs.build_id }} --profile production
