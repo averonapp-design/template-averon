@@ -1,13 +1,29 @@
 // app.config.js
-const appName = process.env.APP_NAME || "Seleta Comunidade";
-const appSlug = process.env.APP_SLUG || "seletacomunidade";
-const iconPath = process.env.APP_ICON_PATH || "./assets/images/icon.png";
-const bundleIos = process.env.IOS_BUNDLE_ID || "com.seletacomunidade.app";
-const pkgAndroid = process.env.ANDROID_PACKAGE || "com.seletacomunidade.app";
-const version = process.env.APP_VERSION || "1.0.0";
-const easProjectId = process.env.EXPO_PROJECT_ID || "55d940a5-19e7-4ef1-80cd-e017fa8e6762";
-const googleServicesIos = process.env.GOOGLE_SERVICES_IOS_PATH || "./GoogleService-Info.plist";
-const googleServicesAndroid = process.env.GOOGLE_SERVICES_ANDROID_PATH || "./google-services.json";
+import fs from 'fs';
+import path from 'path';
+
+let env = process.env;
+
+// Carrega variáveis do env.json (injetadas pelo CI) se existir
+const envJsonPath = path.join(process.cwd(), 'env.json');
+if (fs.existsSync(envJsonPath)) {
+  try {
+    const fileEnv = JSON.parse(fs.readFileSync(envJsonPath, 'utf8'));
+    env = { ...process.env, ...fileEnv };
+  } catch (e) {
+    console.error('Erro ao ler env.json:', e);
+  }
+}
+
+const appName = env.APP_NAME || "Seleta Comunidade";
+const appSlug = env.APP_SLUG || "seletacomunidade";
+const iconPath = env.APP_ICON_PATH || "./assets/images/icon.png";
+const bundleIos = env.IOS_BUNDLE_ID || "com.seletacomunidade.app";
+const pkgAndroid = env.ANDROID_PACKAGE || "com.seletacomunidade.app";
+const version = env.APP_VERSION || "1.0.0";
+const easProjectId = env.EXPO_PROJECT_ID || "55d940a5-19e7-4ef1-80cd-e017fa8e6762";
+const googleServicesIos = env.GOOGLE_SERVICES_IOS_PATH || "./GoogleService-Info.plist";
+const googleServicesAndroid = env.GOOGLE_SERVICES_ANDROID_PATH || "./google-services.json";
 
 export default {
   expo: {
@@ -122,9 +138,9 @@ export default {
         origin: "https://replit.com/",
       },
       ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
-      apiKey: process.env.EXPO_PUBLIC_API_KEY,
-      tenantId: process.env.EXPO_PUBLIC_TENANT_ID,
-      apiUrl: process.env.EXPO_PUBLIC_API_URL,
+      apiKey: env.EXPO_PUBLIC_API_KEY,
+      tenantId: env.EXPO_PUBLIC_TENANT_ID,
+      apiUrl: env.EXPO_PUBLIC_API_URL,
     },
     owner: "averon",
   },

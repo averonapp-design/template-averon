@@ -44,6 +44,7 @@ jobs:
 
       - name: Exportar env vars do Lovable
         run: |
+          echo "$ENV_JSON" > env.json
           echo "$ENV_JSON" > .env.build
           echo "$ENV_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
 
