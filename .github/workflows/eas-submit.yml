@@ -30,6 +30,12 @@ jobs:
           node-version: 20
       - name: Install EAS CLI
         run: npm i -g eas-cli
+      - name: Instalar Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Instalar dependências
+        run: bun install
       - name: Mask inputs
         run: |
           echo "::add-mask::${{ inputs.apple_p8_key }}"
