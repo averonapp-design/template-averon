@@ -57,8 +57,10 @@ jobs:
                 ascApiKeyPath: '.credentials/apple.p8',
                 ascApiKeyId: process.env.APPLE_KEY_ID,
                 ascApiKeyIssuerId: process.env.APPLE_ISSUER_ID,
-                ascAppId: process.env.APPLE_APP_ID,
               };
+              if (process.env.APPLE_APP_ID && process.env.APPLE_APP_ID !== 'null' && process.env.APPLE_APP_ID !== '') {
+                j.submit.production.ios.ascAppId = process.env.APPLE_APP_ID;
+              }
             } else {
               j.submit.production.android = {
                 serviceAccountKeyPath: '.credentials/play.json',
