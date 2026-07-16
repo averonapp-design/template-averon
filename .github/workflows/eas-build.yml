@@ -62,6 +62,7 @@ jobs:
           echo "EXPO_ASC_API_KEY_PATH=/tmp/asc/AuthKey.p8" >> "$GITHUB_ENV"
           echo "EXPO_ASC_KEY_ID=${{ secrets.APPLE_ASC_KEY_ID }}" >> "$GITHUB_ENV"
           echo "EXPO_ASC_ISSUER_ID=${{ secrets.APPLE_ASC_ISSUER_ID }}" >> "$GITHUB_ENV"
+          echo "EXPO_APPLE_TEAM_ID=X7KA8A2UAW" >> "$GITHUB_ENV"
 
       - name: Instalar dependências
         run: bun install
