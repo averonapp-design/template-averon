@@ -45,6 +45,7 @@ export default {
       bundleIdentifier: bundleIos,
       googleServicesFile: googleServicesIos,
       icon: iconPath,
+      buildNumber: String(env.APP_BUILD_NUMBER || env.GITHUB_RUN_NUMBER || "1"),
       infoPlist: {
         NSCameraUsageDescription: "Usado para escanear QR Codes promocionais",
         NSFaceIDUsageDescription: "Usado para autenticação biométrica segura",
@@ -54,7 +55,7 @@ export default {
     },
     android: {
       package: pkgAndroid,
-      versionCode: 4,
+      versionCode: Number(env.APP_BUILD_NUMBER || env.GITHUB_RUN_NUMBER || 4),
       googleServicesFile: googleServicesAndroid,
       adaptiveIcon: {
         foregroundImage: iconPath,
