@@ -4,6 +4,9 @@ import * as FileSystem from "expo-file-system";
 const AVERON_DIRECT = "https://www.averonapp.com/api/public/v1";
 
 function resolveBaseUrl(): string {
+  // Direct API URL override — injected by the Averon CI/CD build system
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (apiUrl) return apiUrl.replace(/\/$/, "");
   // When running inside Replit (dev or web preview), route through the
   // local proxy server to avoid CORS and mobile network restrictions.
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
