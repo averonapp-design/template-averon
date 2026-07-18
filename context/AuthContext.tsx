@@ -247,12 +247,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Sem sessão cacheada: precisa buscar a apiKey da rede mesmo
-      // (usuário nunca logou ou fez logout — espera aceitável)
       const serverKey = await fetchApiKeyFromServer() ?? cachedKey;
       if (serverKey) {
         setApiKey(serverKey);
         await secureSet(KEY_API_KEY, serverKey);
+        setIsLoading(false);
         try {
           const [cfg, temaRes] = await Promise.all([
             averonApi.getAuthConfig(serverKey).catch(() => null),
@@ -267,14 +266,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         } catch {
           setAuthConfig({ require_login: true, allow_signup: true, block_screenshot: false, block_multi_device: false });
-        } finally {
-          setIsLoading(false);
         }
       } else {
         setIsLoading(false);
       }
     } catch {
-    } finally {
       setIsLoading(false);
     }
   }
