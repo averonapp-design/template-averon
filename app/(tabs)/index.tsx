@@ -468,7 +468,9 @@ export default function HomeScreen() {
                     setCatContentW((prev) => ({ ...prev, [cat.id]: w }));
                   }}
                   onLayout={(e) => {
-                    setCatListW((prev) => ({ ...prev, [cat.id]: e.nativeEvent.layout.width }));
+                    if (e?.nativeEvent?.layout) {
+                      setCatListW((prev) => ({ ...prev, [cat.id]: e.nativeEvent.layout.width }));
+                    }
                   }}
                   scrollEventThrottle={16}
                   renderItem={({ item: produto }) => {
