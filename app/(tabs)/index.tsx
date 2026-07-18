@@ -468,8 +468,9 @@ export default function HomeScreen() {
                     setCatContentW((prev) => ({ ...prev, [cat.id]: w }));
                   }}
                   onLayout={(e) => {
-                    if (e?.nativeEvent?.layout) {
-                      setCatListW((prev) => ({ ...prev, [cat.id]: e.nativeEvent.layout.width }));
+                    const width = e?.nativeEvent?.layout?.width;
+                    if (typeof width === "number") {
+                      setCatListW((prev) => ({ ...prev, [cat.id]: width }));
                     }
                   }}
                   scrollEventThrottle={16}
