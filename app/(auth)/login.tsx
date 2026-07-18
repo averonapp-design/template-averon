@@ -176,18 +176,7 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity
-          style={[styles.lockBtn, { top: topPad + 12 }]}
-          onPress={() => { setAdminPass(""); setAdminPassError(""); setAdminModalVisible(true); }}
-          accessibilityLabel="Área restrita"
-        >
-          <View style={[styles.lockBadge, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Feather name="lock" size={15} color={apiKey ? colors.primary : colors.mutedForeground} />
-            {apiKey && (
-              <View style={[styles.configuredDot, { backgroundColor: colors.primary }]} />
-            )}
-          </View>
-        </TouchableOpacity>
+
 
         {/* Header */}
         <View style={styles.header}>
