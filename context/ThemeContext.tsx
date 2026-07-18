@@ -261,8 +261,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (rawTema) {
           try { applyTema(JSON.parse(rawTema)); } catch {}
         }
-        // Fetch fresh tema right away if we have a built-in key and no cache
-        if (builtInKey && !rawTema) {
+        // Fetch fresh tema right away if we have a built-in key
+        if (builtInKey) {
           fetch(`${BASE_URL}/tema?t=${Date.now()}`, {
             headers: { Authorization: `Bearer ${builtInKey}`, "Cache-Control": "no-cache" },
           })

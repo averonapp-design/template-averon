@@ -225,8 +225,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function restoreSession() {
     try {
-      // FASE 1: Apenas leitura local — zero rede, zero espera
       const builtInKey = process.env.EXPO_PUBLIC_API_KEY ?? null;
+      if (builtInKey) {
+        const storedKey = await secureGet(KEY_API_KEY);
+        if (storedKey && storedKey !== builtInKey) {
+          await Promise.all([
+            secureDelete(KEY_API_KEY),
+            secureDelete(KEY_ALUNO_TOKEN),
+            secureDelete(KEY_ALUNO_DATA),
+            AsyncStorage.removeItem(KEY_AVATAR_OVERRIDE),
+            AsyncStorage.removeItem("averon_tema_cache"),
+          ]);
+        }
+      }
+
       const [cachedKey, storedToken, storedData] = await Promise.all([
         builtInKey ? Promise.resolve(builtInKey) : secureGet(KEY_API_KEY),
         secureGet(KEY_ALUNO_TOKEN),
