@@ -267,7 +267,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         } catch {
           setAuthConfig({ require_login: true, allow_signup: true, block_screenshot: false, block_multi_device: false });
+        } finally {
+          setIsLoading(false);
         }
+      } else {
+        setIsLoading(false);
       }
     } catch {
     } finally {
