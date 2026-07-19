@@ -99,8 +99,10 @@ function lightenHex(hex: string, amount: number): string {
 }
 
 function mergeTheme(base: ColorPalette, tema: TemaData, dark: boolean): ColorPalette {
-  const p = tema.primary_color;
-  const accent = tema.accent_color;
+  const p = tema.primary_color || base.primary;
+  const accent = tema.accent_color || p;
+  const bg = tema.background_color || base.background;
+  const fg = tema.foreground_color || base.foreground;
 
   if (dark) {
     // Dark mode: keep dark structural colors, only apply brand primary/accent
@@ -108,9 +110,9 @@ function mergeTheme(base: ColorPalette, tema: TemaData, dark: boolean): ColorPal
       ...base,
       primary: p,
       tint: p,
-      accent: accent + "22",
+      accent: accent.length === 7 ? accent + "22" : accent,
       accentForeground: accent,
-      secondary: p + "25",
+      secondary: p.length === 7 ? p + "25" : p,
       secondaryForeground: p,
       warning: accent,
       warningForeground: "#ffffff",
@@ -118,33 +120,33 @@ function mergeTheme(base: ColorPalette, tema: TemaData, dark: boolean): ColorPal
   }
 
   // Light mode: check if the brand background is actually dark
-  const bgLum = hexLuminance(tema.background_color);
+  const bgLum = hexLuminance(bg);
   const bgIsDark = bgLum < 0.15;
 
   if (bgIsDark) {
     // Dark background in "light" mode — derive dark-appropriate structural colors
     // from the background so cards/inputs don't appear white on black
-    const cardColor = lightenHex(tema.background_color, 0.1);
-    const borderColor = lightenHex(tema.background_color, 0.17);
-    const mutedColor = lightenHex(tema.background_color, 0.07);
-    const inputColor = lightenHex(tema.background_color, 0.14);
+    const cardColor = bg.startsWith("#") && bg.length === 7 ? lightenHex(bg, 0.1) : baseColors.dark.card;
+    const borderColor = bg.startsWith("#") && bg.length === 7 ? lightenHex(bg, 0.17) : baseColors.dark.border;
+    const mutedColor = bg.startsWith("#") && bg.length === 7 ? lightenHex(bg, 0.07) : baseColors.dark.muted;
+    const inputColor = bg.startsWith("#") && bg.length === 7 ? lightenHex(bg, 0.14) : baseColors.dark.input;
     return {
       ...baseColors.dark,
-      background: tema.background_color,
+      background: bg,
       surface: cardColor,
       card: cardColor,
-      foreground: tema.foreground_color,
-      text: tema.foreground_color,
-      cardForeground: tema.foreground_color,
+      foreground: fg,
+      text: fg,
+      cardForeground: fg,
       border: borderColor,
       input: inputColor,
       muted: mutedColor,
       mutedForeground: baseColors.dark.mutedForeground,
       primary: p,
       tint: p,
-      accent: accent + "22",
+      accent: accent.length === 7 ? accent + "22" : accent,
       accentForeground: accent,
-      secondary: p + "25",
+      secondary: p.length === 7 ? p + "25" : p,
       secondaryForeground: p,
       warning: accent,
       warningForeground: "#ffffff",
@@ -156,14 +158,14 @@ function mergeTheme(base: ColorPalette, tema: TemaData, dark: boolean): ColorPal
     ...base,
     primary: p,
     tint: p,
-    background: tema.background_color,
-    surface: tema.background_color,
-    foreground: tema.foreground_color,
-    text: tema.foreground_color,
-    cardForeground: tema.foreground_color,
-    accent: accent + "22",
+    background: bg,
+    surface: bg,
+    foreground: fg,
+    text: fg,
+    cardForeground: fg,
+    accent: accent.length === 7 ? accent + "22" : accent,
     accentForeground: accent,
-    secondary: p + "15",
+    secondary: p.length === 7 ? p + "15" : p,
     secondaryForeground: p,
     warning: accent,
     warningForeground: "#ffffff",
@@ -201,16 +203,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setColors(temaRef.current ? mergeTheme(base, temaRef.current, scheme === "dark") : base);
   }, [effectiveScheme]);
 
-  const applyTema = useCallback((t: TemaData) => {
+  const applyTema = useCallback((t: Partial<TemaData>) => {
     const scheme = resolveScheme(overrideRef.current, deviceSchemeRef.current);
     const base = getBase(scheme);
-    temaRef.current = t;
-    setTema(t);
-    setColors(mergeTheme(base, t, scheme === "dark"));
-    setBrandName(t.nome_marca || APP_NAME);
-    setLogoUrl(t.logo_url ?? null);
-    logger.log('Applied tema', t);
-    AsyncStorage.setItem(TEMA_CACHE_KEY, JSON.stringify(t)).catch(() => {});
+    const mergedTema: TemaData = {
+      primary_color: t.primary_color || temaRef.current?.primary_color || base.primary,
+      secondary_color: t.secondary_color || temaRef.current?.secondary_color || base.secondary,
+      accent_color: t.accent_color || temaRef.current?.accent_color || base.accent,
+      background_color: t.background_color || temaRef.current?.background_color || base.background,
+      foreground_color: t.foreground_color || temaRef.current?.foreground_color || base.foreground,
+      logo_url: t.logo_url !== undefined ? t.logo_url : (temaRef.current?.logo_url ?? null),
+      nome_marca: t.nome_marca || temaRef.current?.nome_marca || APP_NAME,
+      gamificacao_ativa: t.gamificacao_ativa !== undefined ? t.gamificacao_ativa : temaRef.current?.gamificacao_ativa,
+      comunidade_ativa: t.comunidade_ativa !== undefined ? t.comunidade_ativa : temaRef.current?.comunidade_ativa,
+      perfil_ativo: t.perfil_ativo !== undefined ? t.perfil_ativo : temaRef.current?.perfil_ativo,
+    };
+    temaRef.current = mergedTema;
+    setTema(mergedTema);
+    setColors(mergeTheme(base, mergedTema, scheme === "dark"));
+    setBrandName(mergedTema.nome_marca || APP_NAME);
+    setLogoUrl(mergedTema.logo_url ?? null);
+    logger.log('Applied tema', mergedTema);
+    AsyncStorage.setItem(TEMA_CACHE_KEY, JSON.stringify(mergedTema)).catch(() => {});
   }, []);
 
   const fetchTema = useCallback(() => {
