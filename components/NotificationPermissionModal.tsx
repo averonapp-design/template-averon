@@ -119,11 +119,11 @@ export function NotificationPermissionModal() {
 
           {/* Title & Description */}
           <Text style={[styles.title, { color: colors.foreground }]}>
-            Fique por dentro das novidades! 🔔
+            Não perca nenhuma novidade! 🔔
           </Text>
 
           <Text style={[styles.description, { color: colors.mutedForeground }]}>
-            Ative as notificações para receber avisos instantâneos de novos cursos, conteúdos exclusivos, lives e atualizações em tempo real.
+            Ative as notificações para receber avisos importantes, novos lançamentos e comunicados exclusivos.
           </Text>
 
           {/* Action Buttons */}
