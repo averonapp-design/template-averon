@@ -46,6 +46,9 @@ export default {
       googleServicesFile: googleServicesIos,
       icon: iconPath,
       buildNumber: String(env.APP_BUILD_NUMBER || env.GITHUB_RUN_NUMBER || "1"),
+      entitlements: {
+        "aps-environment": "production",
+      },
       infoPlist: {
         NSCameraUsageDescription: "Usado para escanear QR Codes promocionais",
         NSFaceIDUsageDescription: "Usado para autenticação biométrica segura",
