@@ -31,4 +31,14 @@ export const apiCache = {
       await AsyncStorage.removeItem(PREFIX + key);
     } catch {}
   },
+
+  async clearAll(): Promise<void> {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const cacheKeys = keys.filter((k) => k.startsWith(PREFIX) || k.startsWith("@averon_"));
+      if (cacheKeys.length > 0) {
+        await AsyncStorage.multiRemove(cacheKeys);
+      }
+    } catch {}
+  },
 };

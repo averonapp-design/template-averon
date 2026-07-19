@@ -132,20 +132,27 @@ export default function HomeScreen() {
     }
 
     const isGuest = !alunoToken || !aluno?.id;
+    console.log("[HomeScreen] fetchData starting...", { isGuest, apiKey: apiKey.slice(0, 8) + "..." });
 
     // Show cached data instantly on first load — no spinner if cache exists
     const cacheKey = isGuest ? "home_guest" : `home_${aluno!.id}`;
     try {
       const cached = await apiCache.get<HomeCache>(cacheKey);
       if (cached?.categorias?.length) {
+        console.log("[HomeScreen] Cache found & loaded:", { count: cached.categorias.length });
         setCategorias(cached.categorias);
         setAcessos(cached.acessos);
         setAcessoById(cached.acessoById);
         setLoading(false);
+      } else {
+        console.log("[HomeScreen] No valid cache found.");
       }
-    } catch {}
+    } catch (cacheErr) {
+      console.log("[HomeScreen] Failed reading cache:", cacheErr);
+    }
 
     try {
+      console.log("[HomeScreen] Fetching fresh data from API...");
       // Acessos (cursos do usuário) só existem quando logado
       const acessosPromise = isGuest
         ? Promise.resolve({ ok: true, aluno_id: "", total: 0, liberados: 0, cursos: [] as AcessoCurso[] })
@@ -265,6 +272,7 @@ export default function HomeScreen() {
         };
       });
       setAcessos(lista);
+      console.log("[HomeScreen] Fresh data loaded successfully:", { categoriesCount: cats.length, totalProducts: lista.length });
 
       // Persist fresh data so next open is instant
       apiCache.set(cacheKey, { categorias: cats, acessos: lista, acessoById: byId }).catch(() => {});

@@ -18,7 +18,11 @@ if (!isExpoGo) {
 }
 
 import { Aluno, averonApi, setSessionRevokedHandler } from "@/services/averon";
+import { apiCache } from "@/services/apiCache";
+import { getBuiltInApiKey } from "@/utils/config";
+import { createLogger } from '@/utils/logger';
 
+const logger = createLogger('AuthContext');
 export interface AuthConfig {
   require_login: boolean;
   allow_signup: boolean;
@@ -75,9 +79,7 @@ const SERVER_BASE = process.env.EXPO_PUBLIC_DOMAIN
   : "http://localhost:8080";
 
 async function fetchApiKeyFromServer(): Promise<string | null> {
-  // In production builds (Play Store / App Store), the proxy server doesn't
-  // exist — use the API key baked in at build time via EXPO_PUBLIC_API_KEY.
-  const builtInKey = process.env.EXPO_PUBLIC_API_KEY;
+  const builtInKey = getBuiltInApiKey();
   if (builtInKey) return builtInKey;
 
   try {
@@ -225,31 +227,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function restoreSession() {
     try {
-      const builtInKey = process.env.EXPO_PUBLIC_API_KEY ?? null;
+      const builtInKey = getBuiltInApiKey();
+      let keyMismatch = false;
+
       if (builtInKey) {
         const storedKey = await secureGet(KEY_API_KEY);
         if (storedKey && storedKey !== builtInKey) {
+          keyMismatch = true;
+          logger.log('API Key mismatch detected. Wiping stale session and caches.', { storedKey, builtInKey });
           await Promise.all([
             secureDelete(KEY_API_KEY),
             secureDelete(KEY_ALUNO_TOKEN),
             secureDelete(KEY_ALUNO_DATA),
             AsyncStorage.removeItem(KEY_AVATAR_OVERRIDE),
             AsyncStorage.removeItem("averon_tema_cache"),
+            apiCache.clearAll(),
           ]);
         }
+        await secureSet(KEY_API_KEY, builtInKey);
       }
 
-      const [cachedKey, storedToken, storedData] = await Promise.all([
-        builtInKey ? Promise.resolve(builtInKey) : secureGet(KEY_API_KEY),
-        secureGet(KEY_ALUNO_TOKEN),
-        secureGet(KEY_ALUNO_DATA),
-      ]);
+      const [cachedKey, storedToken, storedData] = keyMismatch
+        ? [builtInKey, null, null]
+        : await Promise.all([
+            builtInKey ? Promise.resolve(builtInKey) : secureGet(KEY_API_KEY),
+            secureGet(KEY_ALUNO_TOKEN),
+            secureGet(KEY_ALUNO_DATA),
+          ]);
 
       const hasCachedSession = !!(cachedKey && storedToken && storedData);
       if (hasCachedSession) {
         // Restaura a sessão do cache — app abre em ~20ms
         setApiKey(cachedKey!);
+        logger.log('Restored cached apiKey', cachedKey!);
         setAlunoToken(storedToken!);
+        logger.log('Restored cached alunoToken', storedToken!);
         const parsed = JSON.parse(storedData!);
         const avatarOverride = await AsyncStorage.getItem(KEY_AVATAR_OVERRIDE);
         setAluno(avatarOverride ? { ...parsed, avatar_url: avatarOverride } : parsed);

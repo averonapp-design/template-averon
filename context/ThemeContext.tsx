@@ -13,7 +13,10 @@ import { AppState, useColorScheme } from "react-native";
 import baseColors from "@/constants/colors";
 import { BASE_URL } from "@/services/averon";
 import { useAuth } from "@/context/AuthContext";
+import { getBuiltInApiKey } from "@/utils/config";
+import { createLogger } from '@/utils/logger';
 
+const logger = createLogger('ThemeContext');
 const APP_NAME = Constants.expoConfig?.name ?? "App";
 
 export interface TemaData {
@@ -206,6 +209,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setColors(mergeTheme(base, t, scheme === "dark"));
     setBrandName(t.nome_marca || APP_NAME);
     setLogoUrl(t.logo_url ?? null);
+    logger.log('Applied tema', t);
     AsyncStorage.setItem(TEMA_CACHE_KEY, JSON.stringify(t)).catch(() => {});
   }, []);
 
@@ -248,7 +252,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // fetch a fresh tema using the built-in API key (if set) so branding
   // is applied before AuthContext finishes its own init sequence.
   useEffect(() => {
-    const builtInKey = process.env.EXPO_PUBLIC_API_KEY;
+    const builtInKey = getBuiltInApiKey();
     Promise.all([
       AsyncStorage.getItem(TEMA_CACHE_KEY),
       AsyncStorage.getItem(SCHEME_PREF_KEY),

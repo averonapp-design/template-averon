@@ -181,9 +181,9 @@ export default function LoginScreen() {
         {/* Header */}
         <View style={styles.header}>
           {logoUrl ? (
-            <Image source={{ uri: logoUrl }} style={styles.logoBox} />
+            <Image source={{ uri: logoUrl }} style={styles.logoBox} resizeMode="contain" />
           ) : (
-            <Image source={require("../../assets/images/icon.png")} style={styles.logoBox} />
+            <Image source={require("../../assets/images/icon.png")} style={styles.logoBox} resizeMode="contain" />
           )}
           <Text style={[styles.title, { color: colors.foreground }]}>{brandName}</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>

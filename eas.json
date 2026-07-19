@@ -35,7 +35,6 @@
       "env": {
         "RCT_USE_PREBUILT_RNCORE": "0",
         "RCT_USE_RN_DEP": "0",
-        "EXPO_PUBLIC_API_KEY": "avr_d43ada04d4a714f5d71572c51a432804b845ff44c336af1dd2650d3a",
         "EXPO_PUBLIC_PROXY_BASE": "https://flamengo-app.replit.app/api"
       }
     },
