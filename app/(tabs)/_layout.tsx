@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
 import { useApplePay } from "@/hooks/useApplePay";
 import { useTheme } from '@/context/ThemeContext';
+import { NotificationPermissionModal } from "@/components/NotificationPermissionModal";
 
 type TabConf = { name: string; icon: string; label: string; href: string };
 
@@ -159,16 +160,19 @@ export default function TabLayout() {
   }, [isAuthenticated, isLoading, authConfig]);
 
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="courses" />
-      <Tabs.Screen name="comunidade" />
-      <Tabs.Screen name="achievements" />
-      <Tabs.Screen name="profile" />
-      <Tabs.Screen name="apple-pay" />
-    </Tabs>
+    <>
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{ headerShown: false }}
+      >
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="courses" />
+        <Tabs.Screen name="comunidade" />
+        <Tabs.Screen name="achievements" />
+        <Tabs.Screen name="profile" />
+        <Tabs.Screen name="apple-pay" />
+      </Tabs>
+      <NotificationPermissionModal />
+    </>
   );
 }
