@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { PublicationStepperWizard } from "@/components/PublicationStepperWizard";
 
 export default function AdminSetupScreen() {
   const colors = useColors();
@@ -182,6 +183,8 @@ export default function AdminSetupScreen() {
             )}
           </TouchableOpacity>
         </View>
+
+        <PublicationStepperWizard />
 
         <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={styles.infoRow}>
