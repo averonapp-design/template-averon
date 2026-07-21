@@ -36,6 +36,9 @@ const easProjectId = env.EXPO_PROJECT_ID || "55d940a5-19e7-4ef1-80cd-e017fa8e676
 const googleServicesIos = env.GOOGLE_SERVICES_IOS_PATH || "./GoogleService-Info.plist";
 const googleServicesAndroid = env.GOOGLE_SERVICES_ANDROID_PATH || "./google-services.json";
 
+const customSoundPath = "./assets/sounds/plim.wav";
+const hasCustomSound = fs.existsSync(customSoundPath);
+
 export default {
   expo: {
     name: appName,
@@ -128,7 +131,7 @@ export default {
         {
           icon: iconPath,
           color: "#0F172A",
-          sounds: [],
+          sounds: hasCustomSound ? [customSoundPath] : [],
         },
       ],
       [
