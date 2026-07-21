@@ -151,6 +151,7 @@ export default {
       apiKey: env.EXPO_PUBLIC_API_KEY,
       tenantId: env.EXPO_PUBLIC_TENANT_ID,
       apiUrl: env.EXPO_PUBLIC_API_URL,
+      proxyBase: env.EXPO_PUBLIC_PROXY_BASE,
     },
     owner: "averon",
   },

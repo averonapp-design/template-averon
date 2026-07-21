@@ -4,17 +4,24 @@ import * as FileSystem from "expo-file-system";
 const AVERON_DIRECT = "https://www.averonapp.com/api/public/v1";
 
 function resolveBaseUrl(): string {
+  // In TestFlight / App Store builds, EXPO_PUBLIC_PROXY_BASE is set in eas.json.
+  // Route all API calls through the proxy so PATCH /auth/me and other calls work.
+  import("expo-constants").then((Constants) => {
+    // optional dynamic read if needed, but we will write it synchronously below
+  }).catch(() => {});
+  
+  const Constants = require("expo-constants").default;
+  const proxyBase = process.env.EXPO_PUBLIC_PROXY_BASE || Constants.expoConfig?.extra?.proxyBase;
+  if (proxyBase) return `${proxyBase.replace(/\/$/, "")}/proxy/v1`;
+  
   // Direct API URL override — injected by the Averon CI/CD build system
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL || Constants.expoConfig?.extra?.apiUrl;
   if (apiUrl) return apiUrl.replace(/\/$/, "");
+  
   // When running inside Replit (dev or web preview), route through the
   // local proxy server to avoid CORS and mobile network restrictions.
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
   if (domain) return `https://${domain}/api/proxy/v1`;
-  // In TestFlight / App Store builds, EXPO_PUBLIC_PROXY_BASE is set in eas.json.
-  // Route all API calls through the proxy so PATCH /auth/me and other calls work.
-  const proxyBase = process.env.EXPO_PUBLIC_PROXY_BASE;
-  if (proxyBase) return `${proxyBase.replace(/\/$/, "")}/proxy/v1`;
   return AVERON_DIRECT;
 }
 
