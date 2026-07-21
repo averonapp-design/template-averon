@@ -12,17 +12,18 @@
       }
     },
     "preview": {
-      "distribution": "internal",
       "ios": {
+        "distribution": "store",
         "resourceClass": "m-medium"
       },
       "android": {
+        "distribution": "internal",
         "buildType": "apk"
       },
       "env": {
         "RCT_USE_PREBUILT_RNCORE": "0",
         "RCT_USE_RN_DEP": "0",
-        "EXPO_PUBLIC_PROXY_BASE": "https://flamengo-app.replit.app/api"
+        "EXPO_PUBLIC_PROXY_BASE": "https://www.averonapp.com"
       }
     },
     "app-store": {
