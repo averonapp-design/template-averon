@@ -70,6 +70,40 @@ jobs:
         run: bun install
 
       - name: Build
-        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --no-wait
+        run: |
+          BUILD_FAILED=false
+          eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --json > build-result.json || BUILD_FAILED=true
+          cat build-result.json
+          
+          if [ -f build-result.json ] && jq empty build-result.json 2>/dev/null; then
+            jq -c 'if type == "array" then . else [.] end' build-result.json > builds.json
+            
+            jq -c '.[]' builds.json | while read -r build; do
+              PLATFORM=$(echo "$build" | jq -r '.platform | ascii_lowercase')
+              STATUS=$(echo "$build" | jq -r '.status | ascii_upcase')
+              EAS_BUILD_ID=$(echo "$build" | jq -r '.id')
+              ARTIFACT_URL=$(echo "$build" | jq -r '.artifacts.applicationArchiveUrl // .artifacts.buildUrl // ""')
+              
+              echo "Build concluded for $PLATFORM with status $STATUS."
+              echo "EAS Build ID: $EAS_BUILD_ID"
+              echo "Artifact URL: $ARTIFACT_URL"
+              
+              curl -X POST "$EXPO_PUBLIC_API_URL/expo-callback" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $EXPO_PUBLIC_API_KEY" \
+                -d "{\"github_run_id\": \"$GITHUB_RUN_ID\", \"expo_build_id\": \"$EAS_BUILD_ID\", \"artifact_url\": \"$ARTIFACT_URL\", \"platform\": \"$PLATFORM\", \"status\": \"$STATUS\"}"
+            done
+          else
+            echo "EAS build output JSON not found or invalid."
+            curl -X POST "$EXPO_PUBLIC_API_URL/expo-callback" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $EXPO_PUBLIC_API_KEY" \
+              -d "{\"github_run_id\": \"$GITHUB_RUN_ID\", \"status\": \"ERRORED\"}"
+          fi
+          
+          if [ "$BUILD_FAILED" = "true" ]; then
+            echo "EAS build failed."
+            exit 1
+          fi
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
