@@ -47,7 +47,8 @@
       },
       "env": {
         "RCT_USE_PREBUILT_RNCORE": "0",
-        "RCT_USE_RN_DEP": "0"
+        "RCT_USE_RN_DEP": "0",
+        "EXPO_PUBLIC_PROXY_BASE": "https://www.averonapp.com"
       },
       "autoIncrement": true
     }

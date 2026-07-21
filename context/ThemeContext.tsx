@@ -236,8 +236,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .then((res) => res.json())
       .then((json) => {
         // API returns { ok, config: {...}, banners: [...] }
-        const payload = json.config ?? json.data;
-        if (json.ok && payload) applyTema(payload as TemaData);
+        const payload = json.config ?? json.data ?? json;
+        if (json.ok && payload) {
+          // Normalize Logo URL if key properties are formatted differently
+          const normalizedPayload = {
+            ...payload,
+            logo_url: payload.logo_url ?? payload.logoUrl ?? payload.logo ?? null
+          };
+          applyTema(normalizedPayload as TemaData);
+        }
         if (json.ok && Array.isArray(json.banners)) {
           setBanners(
             // filter out only banners explicitly disabled; if field is absent treat as active
@@ -294,9 +301,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           })
             .then((r) => r.json())
             .then((json) => {
-              const payload = json.config ?? json.data;
+              const payload = json.config ?? json.data ?? json;
               if (json.ok && payload) {
-                applyTema(payload as TemaData);
+                const normalizedPayload = {
+                  ...payload,
+                  logo_url: payload.logo_url ?? payload.logoUrl ?? payload.logo ?? null
+                };
+                applyTema(normalizedPayload as TemaData);
               }
               if (json.ok && Array.isArray(json.banners)) {
                 setBanners((json.banners as Banner[]).filter((b) => b.ativo !== false));
