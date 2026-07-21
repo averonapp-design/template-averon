@@ -8,7 +8,13 @@ function resolveBaseUrl(): string {
   // In TestFlight / App Store builds, EXPO_PUBLIC_PROXY_BASE is set in eas.json.
   // Route all API calls through the proxy so PATCH /auth/me and other calls work.
   const proxyBase = process.env.EXPO_PUBLIC_PROXY_BASE || Constants.expoConfig?.extra?.proxyBase;
-  if (proxyBase) return `${proxyBase.replace(/\/$/, "")}/proxy/v1`;
+  if (proxyBase) {
+    const cleaned = proxyBase.replace(/\/$/, "");
+    if (cleaned.includes("averonapp.com")) {
+      return `${cleaned}/api/public/v1`;
+    }
+    return `${cleaned}/proxy/v1`;
+  }
   
   // Direct API URL override — injected by the Averon CI/CD build system
   const apiUrl = process.env.EXPO_PUBLIC_API_URL || Constants.expoConfig?.extra?.apiUrl;
