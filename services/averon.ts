@@ -1,16 +1,12 @@
 import { Platform } from "react-native";
 import * as FileSystem from "expo-file-system";
+import Constants from "expo-constants";
 
 const AVERON_DIRECT = "https://www.averonapp.com/api/public/v1";
 
 function resolveBaseUrl(): string {
   // In TestFlight / App Store builds, EXPO_PUBLIC_PROXY_BASE is set in eas.json.
   // Route all API calls through the proxy so PATCH /auth/me and other calls work.
-  import("expo-constants").then((Constants) => {
-    // optional dynamic read if needed, but we will write it synchronously below
-  }).catch(() => {});
-  
-  const Constants = require("expo-constants").default;
   const proxyBase = process.env.EXPO_PUBLIC_PROXY_BASE || Constants.expoConfig?.extra?.proxyBase;
   if (proxyBase) return `${proxyBase.replace(/\/$/, "")}/proxy/v1`;
   
