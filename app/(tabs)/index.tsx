@@ -340,22 +340,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {/* Bell */}
-        <TouchableOpacity
-          style={styles.bellBtn}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setShowNotifications(true);
-            markSeen();
-          }}
-        >
-          <Feather name="bell" size={22} color={colors.foreground} />
-          {unreadCount > 0 && (
-            <View style={styles.bellBadge}>
-              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? "9+" : String(unreadCount)}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+
 
         <TouchableOpacity
           onPress={tema?.perfil_ativo !== false ? () => router.push("/(tabs)/profile") : undefined}
@@ -570,118 +555,6 @@ export default function HomeScreen() {
         </>
       )}
     </ScrollView>
-
-    {/* ── Notifications Bottom Sheet ── */}
-    <Animated.View
-      style={[StyleSheet.absoluteFill, { zIndex: 99 }]}
-      pointerEvents={showNotifications ? "box-none" : "none"}
-    >
-      {/* Dim backdrop — tap anywhere outside the panel to close */}
-      <Pressable
-        style={StyleSheet.absoluteFill}
-        onPress={() => setShowNotifications(false)}
-      >
-        <Animated.View
-          style={[StyleSheet.absoluteFill, styles.notifOverlay, { opacity: notifOpacity }]}
-          pointerEvents="none"
-        />
-      </Pressable>
-
-      {/* Sliding panel — rendered after backdrop so it sits on top */}
-      <Animated.View
-        style={[
-          styles.notifPanel,
-          { backgroundColor: colors.background },
-          { transform: [{ translateY: notifSlide }] },
-        ]}
-      >
-        <View style={[styles.notifHandle, { backgroundColor: colors.border }]} />
-        <View style={styles.notifHeaderRow}>
-          <Text style={[styles.notifTitle, { color: colors.foreground }]}>Notificações</Text>
-          <TouchableOpacity onPress={() => setShowNotifications(false)}>
-            <Feather name="x" size={20} color={colors.mutedForeground} />
-          </TouchableOpacity>
-        </View>
-
-      {notifications.length === 0 && ticketReplies.length === 0 ? (
-        <View style={styles.notifEmpty}>
-          <Feather name="bell-off" size={36} color={colors.mutedForeground} />
-          <Text style={[styles.notifEmptyText, { color: colors.mutedForeground }]}>
-            Nenhuma notificação por enquanto
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 16 + 49 }}
-        >
-          {ticketReplies.map((t) => {
-            const isNew = !seenReplyIds.includes(t.id);
-            return (
-              <TouchableOpacity
-                key={`reply_${t.id}`}
-                style={[
-                  styles.notifItem,
-                  { borderBottomColor: colors.border },
-                  isNew ? { backgroundColor: "#10B98110" } : null,
-                ]}
-                activeOpacity={0.75}
-                onPress={() => {
-                  setShowNotifications(false);
-                  router.push("/support" as any);
-                }}
-              >
-                <View style={styles.notifItemLeft}>
-                  <View style={[styles.notifDot, { backgroundColor: isNew ? "#10B981" : "transparent" }]} />
-                </View>
-                <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={[styles.notifItemTitle, { color: colors.foreground }]}>
-                    💬 Resposta no chamado
-                  </Text>
-                  <Text style={[styles.notifItemMsg, { color: colors.mutedForeground }]} numberOfLines={2}>
-                    {t.assunto}{t.last_message ? `: ${t.last_message}` : ""}
-                  </Text>
-                  <Text style={[styles.notifItemTime, { color: colors.mutedForeground }]}>
-                    {relTimeNotif(t.last_message_at ?? t.created_at)}
-                  </Text>
-                </View>
-                <Feather name="chevron-right" size={14} color={colors.mutedForeground} />
-              </TouchableOpacity>
-            );
-          })}
-          {notifications.map((n, i) => {
-            const isNew = new Date(n.created_at).getTime() > lastSeenAt;
-            return (
-              <View
-                key={n.id ?? i}
-                style={[
-                  styles.notifItem,
-                  { borderBottomColor: colors.border },
-                  isNew ? { backgroundColor: colors.primary + "0A" } : null,
-                ]}
-              >
-                <View style={styles.notifItemLeft}>
-                  <View style={[styles.notifDot, { backgroundColor: isNew ? colors.primary : "transparent" }]} />
-                </View>
-                <View style={{ flex: 1, gap: 3 }}>
-                  {n.titulo ? (
-                    <Text style={[styles.notifItemTitle, { color: colors.foreground }]}>{n.titulo}</Text>
-                  ) : null}
-                  <Text style={[styles.notifItemMsg, { color: n.titulo ? colors.mutedForeground : colors.foreground }]}>
-                    {n.mensagem}
-                  </Text>
-                  <Text style={[styles.notifItemTime, { color: colors.mutedForeground }]}>
-                    {relTimeNotif(n.created_at)}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
-      )}
-      </Animated.View>{/* closes sliding panel */}
-    </Animated.View>{/* closes outer wrapper */}
     </View>
   );
 }
