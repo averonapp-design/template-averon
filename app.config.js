@@ -104,7 +104,13 @@ export default {
       ],
       "./plugins/withGoogleUtilitiesModularHeaders",
       "./plugins/withFirebaseMessagingManifestFix",
-      "@react-native-firebase/app",
+      [
+        "@react-native-firebase/app",
+        {
+          iosCredentials: googleServicesIos,
+          androidCredentials: googleServicesAndroid,
+        }
+      ],
       "@react-native-firebase/messaging",
       [
         "expo-notifications",
