@@ -15,6 +15,17 @@ if (fs.existsSync(envJsonPath)) {
   }
 }
 
+// Se o caminho do ícone for personalizado, copia ele para a pasta de assets
+// para que o require estático no login.tsx carregue o logo correto
+if (env.APP_ICON_PATH && fs.existsSync(env.APP_ICON_PATH)) {
+  try {
+    fs.copyFileSync(env.APP_ICON_PATH, "./assets/images/icon.png");
+    console.log("Copiado ícone do inquilino para assets/images/icon.png");
+  } catch (e) {
+    console.error("Erro ao copiar ícone:", e);
+  }
+}
+
 const appName = env.APP_NAME || "Seleta Comunidade";
 const appSlug = env.APP_SLUG || "seletacomunidade";
 const iconPath = env.APP_ICON_PATH || "./assets/images/icon.png";

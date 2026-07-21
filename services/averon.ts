@@ -10,7 +10,7 @@ function resolveBaseUrl(): string {
   const proxyBase = process.env.EXPO_PUBLIC_PROXY_BASE || Constants.expoConfig?.extra?.proxyBase;
   if (proxyBase) {
     const cleaned = proxyBase.replace(/\/$/, "");
-    if (cleaned.includes("averonapp.com")) {
+    if (cleaned.includes("averonapp.com") || cleaned.includes("lovable.app")) {
       return `${cleaned}/api/public/v1`;
     }
     return `${cleaned}/proxy/v1`;
