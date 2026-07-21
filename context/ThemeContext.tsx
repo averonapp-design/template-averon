@@ -276,18 +276,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           overrideRef.current = rawScheme;
           setOverride(rawScheme);
         }
+        
+        let initialTemaLoaded = false;
         if (rawTema) {
-          try { applyTema(JSON.parse(rawTema)); } catch {}
+          try {
+            const parsed = JSON.parse(rawTema);
+            applyTema(parsed);
+            initialTemaLoaded = true;
+          } catch {}
         }
+        
         // Fetch fresh tema right away if we have a built-in key
-        if (builtInKey) {
+        const activeKey = builtInKey || apiKeyRef.current;
+        if (activeKey) {
           fetch(`${BASE_URL}/tema?t=${Date.now()}`, {
-            headers: { Authorization: `Bearer ${builtInKey}`, "Cache-Control": "no-cache" },
+            headers: { Authorization: `Bearer ${activeKey}`, "Cache-Control": "no-cache" },
           })
             .then((r) => r.json())
             .then((json) => {
               const payload = json.config ?? json.data;
-              if (json.ok && payload) applyTema(payload as TemaData);
+              if (json.ok && payload) {
+                applyTema(payload as TemaData);
+              }
               if (json.ok && Array.isArray(json.banners)) {
                 setBanners((json.banners as Banner[]).filter((b) => b.ativo !== false));
               }
@@ -296,7 +306,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [applyTema]);
 
   // Fetch tema on apiKey change, then poll every 30s and on app focus
   useEffect(() => {
