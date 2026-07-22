@@ -50,6 +50,12 @@ export default function LoginScreen() {
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   useEffect(() => {
+    if (authConfig && authConfig.require_login === false) {
+      router.replace("/(tabs)");
+    }
+  }, [authConfig]);
+
+  useEffect(() => {
     checkBiometrics();
     AsyncStorage.getItem("averon_logout_reason").then((reason) => {
       if (reason === "outro_dispositivo") {
