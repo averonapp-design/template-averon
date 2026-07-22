@@ -247,13 +247,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await secureSet(KEY_API_KEY, builtInKey);
       }
 
-      const [cachedKey, storedToken, storedData] = keyMismatch
-        ? [builtInKey, null, null]
+      const [cachedKey, storedToken, storedData, cachedAuthConfig] = keyMismatch
+        ? [builtInKey, null, null, null]
         : await Promise.all([
             builtInKey ? Promise.resolve(builtInKey) : secureGet(KEY_API_KEY),
             secureGet(KEY_ALUNO_TOKEN),
             secureGet(KEY_ALUNO_DATA),
+            AsyncStorage.getItem("averon_auth_config_cache"),
           ]);
+
+      if (cachedAuthConfig) {
+        try {
+          setAuthConfig(JSON.parse(cachedAuthConfig));
+        } catch {}
+      }
 
       const hasCachedSession = !!(cachedKey && storedToken && storedData);
       if (hasCachedSession) {
@@ -275,21 +282,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (serverKey) {
         setApiKey(serverKey);
         await secureSet(KEY_API_KEY, serverKey);
-        setIsLoading(false);
         try {
           const [cfg, temaRes] = await Promise.all([
             averonApi.getAuthConfig(serverKey).catch(() => null),
             averonApi.getTema(serverKey).catch(() => null),
           ]);
           const tc = (temaRes as any)?.config ?? (temaRes as any)?.data ?? {};
-          setAuthConfig({
+          const conf: AuthConfig = {
             require_login: tc.auth_require_login ?? (cfg as any)?.require_login ?? true,
             allow_signup: tc.auth_allow_signup ?? (cfg as any)?.allow_signup ?? true,
             block_screenshot: (cfg as any)?.block_screenshot ?? false,
             block_multi_device: (cfg as any)?.block_multi_device ?? false,
-          });
+          };
+          setAuthConfig(conf);
+          AsyncStorage.setItem("averon_auth_config_cache", JSON.stringify(conf)).catch(() => {});
         } catch {
           setAuthConfig({ require_login: true, allow_signup: true, block_screenshot: false, block_multi_device: false });
+        } finally {
+          setIsLoading(false);
         }
       } else {
         setIsLoading(false);
@@ -315,13 +325,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           averonApi.getAuthConfig(effectiveKey).catch(() => null),
           averonApi.getTema(effectiveKey).catch(() => null),
         ]);
-        const tc = (temaRes as any)?.config ?? (temaRes as any)?.data ?? {};
-        setAuthConfig({
+        const conf: AuthConfig = {
           require_login: tc.auth_require_login ?? (cfg as any)?.require_login ?? true,
           allow_signup: tc.auth_allow_signup ?? (cfg as any)?.allow_signup ?? true,
           block_screenshot: (cfg as any)?.block_screenshot ?? false,
           block_multi_device: (cfg as any)?.block_multi_device ?? false,
-        });
+        };
+        setAuthConfig(conf);
+        AsyncStorage.setItem("averon_auth_config_cache", JSON.stringify(conf)).catch(() => {});
       } catch {}
 
       // Valida o token
