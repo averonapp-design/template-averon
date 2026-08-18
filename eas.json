@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 16.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -50,8 +50,7 @@
         "RCT_USE_PREBUILT_RNCORE": "0",
         "RCT_USE_RN_DEP": "0",
         "EXPO_PUBLIC_PROXY_BASE": "https://www.averonapp.com"
-      },
-      "autoIncrement": true
+      }
     }
   },
   "submit": {
