@@ -54,21 +54,62 @@ jobs:
 
       - name: Configurar Apple ASC API Key (iOS auto-credentials)
         if: ${{ inputs.platform == 'ios' || inputs.platform == 'all' }}
+        env:
+          # Passados via env (nunca interpolados no shell) para evitar injecao
+          # e para que o GitHub mascare os valores automaticamente.
+          # Suporta tanto APPLE_ASC_KEY_P8 quanto o typo APPLE_ASC_KEY_PR.
+          ASC_KEY_P8: ${{ secrets.APPLE_ASC_KEY_P8 }}
+          ASC_KEY_P8_FALLBACK: ${{ secrets.APPLE_ASC_KEY_PR }}
+          ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
         run: |
-          # Suporta tanto APPLE_ASC_KEY_P8 quanto o typo APPLE_ASC_KEY_PR
-          ASC_KEY_CONTENT="${{ secrets.APPLE_ASC_KEY_P8 }}"
+          set -euo pipefail
+
+          ASC_KEY_CONTENT="$ASC_KEY_P8"
           if [ -z "$ASC_KEY_CONTENT" ]; then
-            ASC_KEY_CONTENT="${{ secrets.APPLE_ASC_KEY_PR }}"
+            ASC_KEY_CONTENT="$ASC_KEY_P8_FALLBACK"
           fi
-          echo "::add-mask::$ASC_KEY_CONTENT"
+
+          if [ -z "$ASC_KEY_CONTENT" ]; then
+            echo "::error::Secret APPLE_ASC_KEY_P8 (ou APPLE_ASC_KEY_PR) nao esta definida."
+            echo "::error::Sem a chave ASC o EAS nao consegue autenticar na Apple e o build iOS falha com 'Credentials are not set up'."
+            exit 1
+          fi
+
           mkdir -p /tmp/asc
           printf '%s' "$ASC_KEY_CONTENT" > /tmp/asc/AuthKey.p8
           chmod 600 /tmp/asc/AuthKey.p8
-          echo "EXPO_ASC_API_KEY_PATH=/tmp/asc/AuthKey.p8" >> "$GITHUB_ENV"
-          echo "EXPO_ASC_KEY_ID=${{ secrets.APPLE_ASC_KEY_ID }}" >> "$GITHUB_ENV"
-          echo "EXPO_ASC_ISSUER_ID=${{ secrets.APPLE_ASC_ISSUER_ID }}" >> "$GITHUB_ENV"
-          echo "EXPO_APPLE_TEAM_ID=X7KA8A2UAW" >> "$GITHUB_ENV"
-          echo "EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION" >> "$GITHUB_ENV"
+
+          if [ ! -s /tmp/asc/AuthKey.p8 ]; then
+            echo "::error::Arquivo /tmp/asc/AuthKey.p8 ficou vazio apos a escrita."
+            exit 1
+          fi
+
+          if ! grep -q "BEGIN PRIVATE KEY" /tmp/asc/AuthKey.p8; then
+            echo "::error::A chave ASC nao parece um .p8 valido (falta o cabecalho '-----BEGIN PRIVATE KEY-----')."
+            echo "::error::Cole o conteudo COMPLETO do arquivo .p8 na secret, incluindo as linhas BEGIN/END."
+            exit 1
+          fi
+
+          MISSING=""
+          if [ -z "$ASC_KEY_ID" ]; then MISSING="$MISSING APPLE_ASC_KEY_ID"; fi
+          if [ -z "$ASC_ISSUER_ID" ]; then MISSING="$MISSING APPLE_ASC_ISSUER_ID"; fi
+          if [ -n "$MISSING" ]; then
+            echo "::error::Secrets obrigatorias ausentes:$MISSING"
+            exit 1
+          fi
+
+          echo "Chave ASC validada ($(wc -c < /tmp/asc/AuthKey.p8) bytes)."
+          echo "Lembrete: a chave precisa ter papel 'App Manager' ou 'Admin' no App Store Connect."
+          echo "Uma chave com papel 'Developer' nao consegue criar Distribution Certificate."
+
+          {
+            echo "EXPO_ASC_API_KEY_PATH=/tmp/asc/AuthKey.p8"
+            echo "EXPO_ASC_KEY_ID=$ASC_KEY_ID"
+            echo "EXPO_ASC_ISSUER_ID=$ASC_ISSUER_ID"
+            echo "EXPO_APPLE_TEAM_ID=X7KA8A2UAW"
+            echo "EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION"
+          } >> "$GITHUB_ENV"
 
       - name: Instalar dependências
         run: bun install
