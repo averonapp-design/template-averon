@@ -39,3 +39,8 @@ yarn-error.*
 .vercel
 
 .env
+
+# Arquivos gerados pelo CI a partir do env_json do tenant.
+# Contem a API key do cliente -- nunca devem ser commitados (repo publico).
+env.json
+.env.build
