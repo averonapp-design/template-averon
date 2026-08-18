@@ -1,0 +1,55 @@
+# Este arquivo SUBSTITUI o .gitignore ao montar o pacote enviado ao EAS Build.
+# Por isso ele precisa repetir todo o conteudo do .gitignore -- se um padrao
+# existir la e nao aqui, o arquivo passa a ser enviado ao worker.
+# https://docs.expo.dev/build-reference/easignore/
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+.vercel
+
+.env
+.env.build
+
+# ---------------------------------------------------------------------------
+# Reinclusao. O app.config.js le env.json de process.cwd() DENTRO do worker do
+# EAS para resolver projectId, bundle id e caminhos do Firebase do tenant. O
+# arquivo e gerado pelo CI e fica no .gitignore para nao ser commitado por
+# acidente (o repo e publico e ele contem a API key do cliente) -- mas precisa
+# subir no pacote do build. Sem esta linha o config cai no projectId fixo de
+# fallback e o build falha com "does not match the current project id".
+# Precisa ser a ultima regra para ter precedencia.
+!env.json
