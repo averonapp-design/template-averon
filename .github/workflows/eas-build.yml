@@ -25,8 +25,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ENV_JSON: ${{ inputs.env_json }}
 
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +44,35 @@ jobs:
       - name: Instalar EAS CLI
         run: npm install -g eas-cli
 
-      - name: Exportar env vars do Lovable
+      # Colocado logo antes do primeiro uso do env_json, e depois do step que
+      # garante o jq. O repo e publico, e logs de Actions em repo publico sao
+      # legiveis por qualquer um. O env_json chega como input de
+      # workflow_dispatch, e inputs NAO sao mascarados automaticamente como
+      # secrets: sem isto, cada valor aparece em texto puro no bloco "env:" de
+      # todos os steps seguintes. Mascarando aqui, os demais mostram "***".
+      - name: Mascarar valores do env_json
+        env:
+          ENV_JSON: ${{ inputs.env_json }}
         run: |
+          set -euo pipefail
+          printf '%s' "$ENV_JSON" > /tmp/env_json_raw
+          # Mascara apenas valores de chaves sensiveis. Mascarar tudo deixaria
+          # o log ilegivel (APP_NAME, bundle id e URL viram "***") sem ganho real.
+          jq -r 'to_entries[]
+                 | select(.key | test("KEY|TOKEN|SECRET|PASSWORD"; "i"))
+                 | .value
+                 | select(type == "string")
+                 | select(length > 7)' /tmp/env_json_raw > /tmp/env_json_values
+          while IFS= read -r value; do
+            echo "::add-mask::$value"
+          done < /tmp/env_json_values
+          echo "Mascarados $(wc -l < /tmp/env_json_values) valores do env_json para o restante do job."
+
+      - name: Exportar env vars do Lovable
+        env:
+          ENV_JSON: ${{ inputs.env_json }}
+        run: |
+          set -euo pipefail
           echo "$ENV_JSON" > env.json
           echo "$ENV_JSON" > .env.build
           echo "$ENV_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
