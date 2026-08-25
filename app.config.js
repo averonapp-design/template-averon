@@ -78,18 +78,27 @@ export default {
         foregroundImage: iconPath,
         backgroundColor: "#0F172A",
       },
+      // Politica do Google Play sobre acesso a fotos e videos: apps que miram
+      // API 33+ so podem pedir READ_MEDIA_IMAGES / READ_MEDIA_VIDEO se o seletor
+      // do sistema for tecnicamente insuficiente. Nao e o caso aqui: o
+      // expo-image-picker ja usa o Photo Picker do Android
+      // (PickVisualMediaRequest), que dispensa permissao. O unico acesso a
+      // galeria e ESCRITA, ao salvar figurinha, coberta por
+      // WRITE_EXTERNAL_STORAGE (o sistema limita a API <= 28 sozinho).
       permissions: [
         "CAMERA",
-        "READ_MEDIA_IMAGES",
-        "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
+      ],
+      // O plugin do expo-media-library injeta as READ_MEDIA_* no manifesto por
+      // conta propria -- tirar da lista acima nao basta. Sem bloquear aqui elas
+      // reaparecem no pacote e o Play reprova de novo.
+      blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.ACCESS_MEDIA_LOCATION",
       ],
     },
     web: {
@@ -147,7 +156,9 @@ export default {
         {
           photosPermission: "Necessário para salvar figurinhas na galeria",
           savePhotosPermission: "Necessário para salvar figurinhas na galeria",
-          isAccessMediaLocationEnabled: true,
+          // Bloqueada em blockedPermissions: so faz sentido junto de
+          // READ_MEDIA_IMAGES, que a politica do Play nao permite mais.
+          isAccessMediaLocationEnabled: false,
         },
       ],
       "expo-web-browser",

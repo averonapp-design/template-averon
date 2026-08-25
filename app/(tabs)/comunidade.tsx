@@ -233,11 +233,9 @@ export default function ComunidadeScreen() {
   }
 
   async function pickImages() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permissão necessária", "Permita acesso à galeria para adicionar fotos.");
-      return;
-    }
+    // Sem pedido de permissão: o Photo Picker do Android entrega apenas as
+    // imagens selecionadas, sem READ_MEDIA_IMAGES (proibida pela política do
+    // Google Play para apps que miram API 33+).
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
