@@ -80,11 +80,9 @@ export default function ProfileScreen() {
 
   async function handlePickAvatar() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert("Permissão necessária", "Permita o acesso à galeria nas configurações.");
-      return;
-    }
+    // Sem pedido de permissão: launchImageLibraryAsync usa o Photo Picker do
+    // Android, que devolve só a imagem escolhida e não exige READ_MEDIA_IMAGES
+    // (proibida pela política do Google Play para apps que miram API 33+).
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,

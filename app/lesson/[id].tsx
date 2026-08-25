@@ -128,7 +128,12 @@ export default function LessonScreen() {
   const [savedStickers, setSavedStickers] = useState<Set<number>>(new Set());
   const [copiedStickers, setCopiedStickers] = useState<Set<number>>(new Set());
   const [copyingSticker, setCopyingSticker] = useState<number | null>(null);
-  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
+  // writeOnly: salvar figurinha só escreve na galeria. Pedir a permissão de
+  // leitura completa acionaria READ_MEDIA_IMAGES, que a política do Google Play
+  // não permite mais para apps que miram API 33+.
+  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions({
+    writeOnly: true,
+  });
 
   // Listen for height postMessages from the HTML iframe (web only)
   useEffect(() => {
