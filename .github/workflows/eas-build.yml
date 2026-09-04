@@ -36,7 +36,10 @@ jobs:
       - name: Instalar Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          # Fixado de proposito. Com "latest", o runner pulou de 1.3.14 para
+          # 1.4.0 sozinho e o build quebrou em `bun install --frozen-lockfile`.
+          # 1.3.14 e a versao dos ultimos builds Android concluidos com sucesso.
+          bun-version: 1.3.14
 
       - name: Instalar jq
         run: sudo apt-get update && sudo apt-get install -y jq
