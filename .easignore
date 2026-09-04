@@ -44,6 +44,18 @@ yarn-error.*
 .env
 .env.build
 
+# Lockfiles gerados no runner do GitHub Actions pelo `bun install`. Eles nao
+# estao no controle de versao; sobem so porque foram criados no diretorio de
+# trabalho. Ao chegarem no worker, o EAS passa a rodar
+# `bun install --frozen-lockfile`, que falha quando a versao de bun do runner
+# difere da do worker (foi o que quebrou quando o runner pulou de 1.3.14 para
+# 1.4.0). Sem lockfile no pacote, o worker resolve a partir do package.json.
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
 # ---------------------------------------------------------------------------
 # Reinclusao. O app.config.js le env.json de process.cwd() DENTRO do worker do
 # EAS para resolver projectId, bundle id e caminhos do Firebase do tenant. O
